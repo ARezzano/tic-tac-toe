@@ -9,6 +9,12 @@ const Gameboard = (()=>{
         return false;
     }
 
+    const resetGame = () => {
+        for(let i = 0; i < board.length; i++){
+            board[i] = null;
+        }
+    }
+
     return {
         getBoard: ()=> [...board],
         placeMarker
@@ -69,7 +75,7 @@ const gameManager = (() => {
             if(!winner){
                 currentTurn = currentTurn === player1 ? player2: player1;
             }
-            
+
             return {
                 board: Gameboard.getBoard(),
                 winner: winner
