@@ -1,18 +1,34 @@
 const Gameboard = (()=>{
     const board = [null,null,null,null,null,null,null,null,null];
-    return {getBoard: ()=> [...board]}
+
+    const placeMarker = (index,marker) => {
+        if(board[index] === null){
+            board[index] = marker;
+            return true;
+        }
+        return false;
+    }
+
+    return {
+        getBoard: ()=> [...board],
+        placeMarker
+    }
 })();
 
 function newPlayer(name,marker){
-    return {name,marker};
+    return {
+        name,
+        marker
+    };
 }
 
 const gameManager = (() => {
     const player1 = newPlayer("Player 1", "X");
     const player2 = newPlayer("Player 2", "O");
     let currentTurn = player1;
+    let winner = null;
 
-    const winConditions = () => {
+    const winConditions = [
         [0,1,2],
         [3,4,5],
         [6,7,8],
@@ -21,10 +37,15 @@ const gameManager = (() => {
         [0,3,6],
         [1,4,7],
         [2,5,8]
-    }
+    ];
 
     const getWinner = () => {
         const board = Gameboard.getBoard();
+
+
+        if(!board.includes(null)){
+            return "draw";
+        }
 
         for(const condition of winConditions){
             const [a,b,c] = condition;
@@ -32,17 +53,35 @@ const gameManager = (() => {
             if(board[a] && board[a] === board[b] && board[a] === board[c]){
                 return board[a] === player1.marker ? player1 : player2;
             }
+        }
 
-            if(!board.includes(null)){
-                return "draw";
+        return null;
+
+    }
+
+    const playTurn = (index) => {
+        const board = Gameboard.getBoard();
+
+        if(board[index] === null && !winner){
+            Gameboard.placeMarker(index,currentTurn.marker);
+            winner = getWinner();
+
+            if(!winner){
+                currentTurn = currentTurn === player1 ? player2: player1;
             }
-
-            return null;
+            
+            return {
+                board: Gameboard.getBoard(),
+                winner: winner
+            };
         }
 
-        return{
-            currentTurn,
-            getWinner
-        }
+        return null;
+    }
+
+    return{
+        currentTurn,
+        getWinner,
+        playTurn
     }
 })();
