@@ -1,6 +1,8 @@
 const startButton = document.querySelector("#start-button");
 const leftContent = document.querySelector(".left-content");
 const playerNames = document.querySelector(".player-names");
+const boardCells = document.querySelectorAll(".board-cell");
+let hasStarted = false;
 
 const Gameboard = (()=>{
     const board = [null,null,null,null,null,null,null,null,null];
@@ -100,8 +102,25 @@ const gameManager = (() => {
 startButton.addEventListener("click",function(){
     leftContent.removeChild(playerNames);
     leftContent.removeChild(startButton);
+    hasStarted = true;
 
     let playerTurnDisplay = document.createElement("p");
     playerTurnDisplay.textContent = `It's ${gameManager.currentTurn.name}'s turn`;
     leftContent.appendChild(playerTurnDisplay);
+});
+
+boardCells.forEach(function(cell){
+    cell.addEventListener("mouseenter", ()=>{
+        if(hasStarted === true){
+            if(gameManager.currentTurn === gameManager.player1){
+                cell.style.backgroundColor = "red";
+            }else{
+                cell.style.backgroundColor = "black";
+            }
+        }
+    });
+
+    cell.addEventListener("mouseleave",()=>{
+        cell.style.backgroundColor = "white";
+    });
 });
