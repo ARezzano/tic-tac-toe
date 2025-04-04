@@ -1,3 +1,7 @@
+const startButton = document.querySelector("#start-button");
+const leftContent = document.querySelector(".left-content");
+const playerNames = document.querySelector(".player-names");
+
 const Gameboard = (()=>{
     const board = [null,null,null,null,null,null,null,null,null];
 
@@ -91,3 +95,13 @@ const gameManager = (() => {
         playTurn
     }
 })();
+
+
+startButton.addEventListener("click",function(){
+    leftContent.removeChild(playerNames);
+    leftContent.removeChild(startButton);
+
+    let playerTurnDisplay = document.createElement("p");
+    playerTurnDisplay.textContent = `It's ${gameManager.currentTurn.name}'s turn`;
+    leftContent.appendChild(playerTurnDisplay);
+});
