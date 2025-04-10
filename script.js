@@ -92,35 +92,83 @@ const gameManager = (() => {
     }
 
     return{
-        currentTurn,
+        getCurrentTurn: () => currentTurn,
         getWinner,
-        playTurn
+        playTurn,
+        player1,
+        player2
     }
 })();
 
+let playerTurnDisplay = document.createElement("p");
+
+const updateTurn = function(){
+    playerTurnDisplay.textContent = `It's ${gameManager.getCurrentTurn().name}'s turn`;
+    leftContent.appendChild(playerTurnDisplay);
+}
 
 startButton.addEventListener("click",function(){
     leftContent.removeChild(playerNames);
     leftContent.removeChild(startButton);
     hasStarted = true;
 
-    let playerTurnDisplay = document.createElement("p");
-    playerTurnDisplay.textContent = `It's ${gameManager.currentTurn.name}'s turn`;
-    leftContent.appendChild(playerTurnDisplay);
+    resetButton = document.createElement("button");
+    resetButton.textContent = "Reset";
+    resetButton.addEventListener("click",()=> Gameboard.resetGame );
+    leftContent.appendChild(resetButton);
+
+    updateTurn();
 });
 
-boardCells.forEach(function(cell){
+boardCells.forEach(function(cell, index){
+    let hasBeenClicked = false;
+
+    cell.addEventListener("click",()=>{
+        if((hasStarted === true) && (!hasBeenClicked)){
+            const currentPlayer = gameManager.getCurrentTurn();
+
+            const result = gameManager.playTurn(index);
+
+            if(currentPlayer === gameManager.player1){
+                cell.style.backgroundColor = "blue";
+            }else if(currentPlayer === gameManager.player2){
+                cell.style.backgroundColor = "purple";
+            }
+
+            hasBeenClicked = true;
+
+            if(result){
+                if (result.winner){
+                    if(result.winner === "draw"){
+                        alert("It's a draw!");
+                    }else{
+                        alert(`${result.winner.name} wins!`);
+                    }
+                } else {
+                    updateTurn();
+                }
+            }
+        }
+
+        console.log(gameManager.currentTurn);//check if player turn changed
+    });
+
     cell.addEventListener("mouseenter", ()=>{
-        if(hasStarted === true){
-            if(gameManager.currentTurn === gameManager.player1){
+        if((hasStarted === true) && (!hasBeenClicked)){
+            if(gameManager.getCurrentTurn() === gameManager.player1){
                 cell.style.backgroundColor = "red";
-            }else{
-                cell.style.backgroundColor = "black";
+            }else if(gameManager.getCurrentTurn() === gameManager.player2){
+                cell.style.backgroundColor = "green";
             }
         }
     });
 
     cell.addEventListener("mouseleave",()=>{
-        cell.style.backgroundColor = "white";
+        if(!hasBeenClicked){
+            cell.style.backgroundColor = "white";
+        }
     });
+
 });
+
+//find out why painted cells != board elements
