@@ -2,6 +2,9 @@ const startButton = document.querySelector("#start-button");
 const leftContent = document.querySelector(".left-content");
 const playerNames = document.querySelector(".player-names");
 const boardCells = document.querySelectorAll(".board-cell");
+const player1Name = document.getElementById("player1-name");
+const player2Name = document.getElementById("player2-name");
+
 let hasStarted = false;
 
 const Gameboard = (()=>{
@@ -19,11 +22,15 @@ const Gameboard = (()=>{
         for(let i = 0; i < board.length; i++){
             board[i] = null;
         }
+        const test = document.createElement("p");
+        test.textContent = "helloooooo"
+        leftContent.appendChild(test);
     }
 
     return {
         getBoard: ()=> [...board],
-        placeMarker
+        placeMarker,
+        resetGame
     }
 })();
 
@@ -34,10 +41,30 @@ function newPlayer(name,marker){
     };
 }
 
+startButton.addEventListener("click",function(){
+    hasStarted = true;
+
+    let player1Input = player1Name.value || "Player 1";
+    let player2Input = player2Name.value || "Player 2";
+
+    gameManager.init(player1Input, player2Input);
+
+
+    leftContent.removeChild(playerNames);
+    leftContent.removeChild(startButton);
+
+    resetButton = document.createElement("button");
+    resetButton.textContent = "Reset";
+    resetButton.addEventListener("click",()=> Gameboard.resetGame() );
+    leftContent.appendChild(resetButton);
+
+    updateTurn();
+});
+
 const gameManager = (() => {
-    const player1 = newPlayer("Player 1", "X");
-    const player2 = newPlayer("Player 2", "O");
-    let currentTurn = player1;
+    let player1;
+    let player2;
+    let currentTurn;
     let winner = null;
 
     const winConditions = [
@@ -50,6 +77,13 @@ const gameManager = (() => {
         [1,4,7],
         [2,5,8]
     ];
+
+    const init = (name1, name2) => {
+        player1 = newPlayer(name1, "X");
+        player2 = newPlayer(name2, "O");
+        currentTurn = player1;
+        winner = null;
+    };
 
     const getWinner = () => {
         const board = Gameboard.getBoard();
@@ -91,34 +125,28 @@ const gameManager = (() => {
         return null;
     }
 
+    const getCurrentTurn = () => currentTurn;
+
+    const getPlayer1 = () => player1;
+    const getPlayer2 = () => player2;
+
     return{
-        getCurrentTurn: () => currentTurn,
+        init,
         getWinner,
         playTurn,
-        player1,
-        player2
+        getCurrentTurn,
+        getPlayer1,
+        getPlayer2
     }
 })();
 
 let playerTurnDisplay = document.createElement("p");
 
-const updateTurn = function(){
-    playerTurnDisplay.textContent = `It's ${gameManager.getCurrentTurn().name}'s turn`;
+const updateTurn = function() {
+    const currentPlayer = gameManager.getCurrentTurn();
+    playerTurnDisplay.textContent = `It's ${currentPlayer.name}'s turn`;
     leftContent.appendChild(playerTurnDisplay);
 }
-
-startButton.addEventListener("click",function(){
-    leftContent.removeChild(playerNames);
-    leftContent.removeChild(startButton);
-    hasStarted = true;
-
-    resetButton = document.createElement("button");
-    resetButton.textContent = "Reset";
-    resetButton.addEventListener("click",()=> Gameboard.resetGame );
-    leftContent.appendChild(resetButton);
-
-    updateTurn();
-});
 
 boardCells.forEach(function(cell, index){
     let hasBeenClicked = false;
@@ -129,9 +157,9 @@ boardCells.forEach(function(cell, index){
 
             const result = gameManager.playTurn(index);
 
-            if(currentPlayer === gameManager.player1){
+            if(currentPlayer === gameManager.getPlayer1()){
                 cell.style.backgroundColor = "blue";
-            }else if(currentPlayer === gameManager.player2){
+            }else if(currentPlayer === gameManager.getPlayer2()){
                 cell.style.backgroundColor = "purple";
             }
 
@@ -155,9 +183,9 @@ boardCells.forEach(function(cell, index){
 
     cell.addEventListener("mouseenter", ()=>{
         if((hasStarted === true) && (!hasBeenClicked)){
-            if(gameManager.getCurrentTurn() === gameManager.player1){
+            if(gameManager.getCurrentTurn() === gameManager.getPlayer1()){
                 cell.style.backgroundColor = "red";
-            }else if(gameManager.getCurrentTurn() === gameManager.player2){
+            }else if(gameManager.getCurrentTurn() === gameManager.getPlayer2()){
                 cell.style.backgroundColor = "green";
             }
         }
@@ -171,4 +199,4 @@ boardCells.forEach(function(cell, index){
 
 });
 
-//find out why painted cells != board elements
+//next commit: export resetGame(), player turn now displayed correctly
